@@ -3,32 +3,39 @@ const Category = require('../models/Category');
 const ContactMessage = require('../models/ContactMessage');
 const { toPlainText } = require('../utils/markdown');
 
-const PUBLISHED = { status: 'published', publishedAt: { $lte: new Date() } };
+// IMPORTANT: this must be a function, not a plain object. A plain object
+// would call `new Date()` only once, when the server process starts, and
+// every published-article query afterwards would compare against that
+// frozen boot-time timestamp forever - silently hiding every article
+// published after the server started. Calling published() fresh in each
+// query below evaluates `new Date()` at request time instead.
+function published() {
+  return { status: 'published', publishedAt: { $lte: new Date() } };
+}
 
 const ARTICLE_CARD_FIELDS =
   'title subtitle slug excerpt featuredImage author category tags readingTimeMinutes publishedAt isTrending isFeatured viewCount';
 
 async function getHome(req, res, next) {
   try {
-    const [featured, latest, trending, categories] = await Promise.all([
-      Article.findOne({ ...PUBLISHED, isFeatured: true })
+    const [featured, latest, trending] = await Promise.all([
+      Article.findOne({ ...published(), isFeatured: true })
         .sort({ publishedAt: -1 })
         .select(ARTICLE_CARD_FIELDS)
         .populate('category', 'name slug')
         .lean(),
-      Article.find(PUBLISHED)
+      Article.find(published())
         .sort({ publishedAt: -1 })
         .limit(7)
         .select(ARTICLE_CARD_FIELDS)
         .populate('category', 'name slug')
         .lean(),
-      Article.find({ ...PUBLISHED, isTrending: true })
+      Article.find({ ...published(), isTrending: true })
         .sort({ publishedAt: -1 })
         .limit(res.locals.site.trendingCount)
         .select(ARTICLE_CARD_FIELDS)
         .populate('category', 'name slug')
-        .lean(),
-      Category.find().sort({ name: 1 }).lean()
+        .lean()
     ]);
 
     // Featured falls back to the newest published article if none is marked featured.
@@ -37,9 +44,31 @@ async function getHome(req, res, next) {
       (a) => !heroArticle || String(a._id) !== String(heroArticle._id)
     );
 
+    // Homepage category sections show whichever categories have the most
+    // *recent* published articles - not just the first 4 alphabetically.
+    // That way a newer or currently-active section (e.g. a "News" category
+    // you just started publishing to) surfaces here on its own merit,
+    // instead of being buried because its name starts later in the alphabet.
+    const mostActiveCategoryIds = await Article.aggregate([
+      { $match: published() },
+      { $sort: { publishedAt: -1 } },
+      { $group: { _id: '$category', mostRecentPublishedAt: { $first: '$publishedAt' } } },
+      { $sort: { mostRecentPublishedAt: -1 } },
+      { $limit: 4 }
+    ]);
+
+    const activeCategories = await Category.find({
+      _id: { $in: mostActiveCategoryIds.map((c) => c._id) }
+    }).lean();
+    // Preserve the "most recent activity" order from the aggregation above,
+    // since Category.find() does not guarantee to return results in $in order.
+    const categoriesByRecentActivity = mostActiveCategoryIds
+      .map((c) => activeCategories.find((cat) => String(cat._id) === String(c._id)))
+      .filter(Boolean);
+
     const categorySections = await Promise.all(
-      categories.slice(0, 4).map(async (cat) => {
-        const articles = await Article.find({ ...PUBLISHED, category: cat._id })
+      categoriesByRecentActivity.map(async (cat) => {
+        const articles = await Article.find({ ...published(), category: cat._id })
           .sort({ publishedAt: -1 })
           .limit(3)
           .select(ARTICLE_CARD_FIELDS)
@@ -69,14 +98,14 @@ async function getArticlesList(req, res, next) {
     const perPage = res.locals.site.articlesPerPage;
 
     const [articles, total] = await Promise.all([
-      Article.find(PUBLISHED)
+      Article.find(published())
         .sort({ publishedAt: -1 })
         .skip((page - 1) * perPage)
         .limit(perPage)
         .select(ARTICLE_CARD_FIELDS)
         .populate('category', 'name slug')
         .lean(),
-      Article.countDocuments(PUBLISHED)
+      Article.countDocuments(published())
     ]);
 
     res.render('public/articles', {
@@ -94,7 +123,7 @@ async function getArticlesList(req, res, next) {
 
 async function getArticleDetail(req, res, next) {
   try {
-    const article = await Article.findOne({ slug: req.params.slug, ...PUBLISHED })
+    const article = await Article.findOne({ slug: req.params.slug, ...published() })
       .populate('category', 'name slug')
       .populate('tags', 'name slug')
       .lean();
@@ -107,7 +136,7 @@ async function getArticleDetail(req, res, next) {
     Article.updateOne({ _id: article._id }, { $inc: { viewCount: 1 } }).catch(() => {});
 
     const related = await Article.find({
-      ...PUBLISHED,
+      ...published(),
       category: article.category._id,
       _id: { $ne: article._id }
     })
@@ -143,14 +172,14 @@ async function getCategoryPage(req, res, next) {
     const perPage = res.locals.site.articlesPerPage;
 
     const [articles, total] = await Promise.all([
-      Article.find({ ...PUBLISHED, category: category._id })
+      Article.find({ ...published(), category: category._id })
         .sort({ publishedAt: -1 })
         .skip((page - 1) * perPage)
         .limit(perPage)
         .select(ARTICLE_CARD_FIELDS)
         .populate('category', 'name slug')
         .lean(),
-      Article.countDocuments({ ...PUBLISHED, category: category._id })
+      Article.countDocuments({ ...published(), category: category._id })
     ]);
 
     res.render('public/category', {
@@ -174,7 +203,7 @@ async function getSearch(req, res, next) {
 
     if (query.length > 0) {
       articles = await Article.find({
-        ...PUBLISHED,
+        ...published(),
         $text: { $search: query }
       })
         .select(ARTICLE_CARD_FIELDS)

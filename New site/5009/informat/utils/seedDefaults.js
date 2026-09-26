@@ -1,7 +1,7 @@
 const Category = require('../models/Category');
 const slugify = require('./slugify');
 
-const DEFAULT_CATEGORIES = ['Forex', 'Crypto', 'Finance', 'Technology', 'Business', 'Markets'];
+const DEFAULT_CATEGORIES = ['News', 'Forex', 'Crypto', 'Finance', 'Technology', 'Business', 'Markets'];
 
 // Only ever seeds empty-state categories so the nav isn't blank on first deploy.
 // Never creates sample/fake articles, users, or analytics data.
