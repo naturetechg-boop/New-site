@@ -1,0 +1,39 @@
+<div class="admin-topbar"><h1>Media Library</h1></div>
+
+<% if (typeof error !== 'undefined' && error) { %>
+  <div class="alert alert-error"><%= error %></div>
+<% } %>
+
+<div class="panel" style="max-width:480px;">
+  <h2>Upload an image</h2>
+  <form action="/admin/media/upload" method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="field">
+      <input type="file" name="file" accept="image/*" required>
+    </div>
+    <button type="submit" class="btn">Upload</button>
+  </form>
+  <p class="hint">Images are stored in the database, so they persist across Render restarts and redeploys (unlike local disk on the free plan).</p>
+</div>
+
+<div class="panel">
+  <h2>All media (<%= files.length %>)</h2>
+  <% if (files.length === 0) { %>
+    <div class="empty-state">No media uploaded yet.</div>
+  <% } else { %>
+    <div class="media-grid">
+      <% files.forEach(function(f) { %>
+        <div class="media-item">
+          <img src="/media/<%= f._id %>" alt="<%= f.filename %>" loading="lazy">
+          <div class="media-item-footer">
+            <span title="<%= f.filename %>" style="font-size:0.72rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:80px;"><%= f.filename %></span>
+            <form action="/admin/media/<%= f._id %>/delete" method="POST" onsubmit="return confirm('Delete this image? Articles using it will show a broken image.');">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button type="submit" class="danger">Delete</button>
+            </form>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>

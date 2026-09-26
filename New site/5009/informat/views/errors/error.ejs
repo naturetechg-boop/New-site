@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= typeof title !== 'undefined' ? title : 'Error' %></title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+  <div class="container">
+    <div class="error-page">
+      <h1><%= typeof statusCode !== 'undefined' ? statusCode : 500 %></h1>
+      <p><%= typeof message !== 'undefined' ? message : 'Something went wrong.' %></p>
+      <a href="/" class="btn">Back to homepage</a>
+    </div>
+  </div>
+</body>
+</html>

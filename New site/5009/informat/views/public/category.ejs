@@ -1,0 +1,17 @@
+<div class="container">
+  <div class="page-header">
+    <h1><%= category.name %></h1>
+    <% if (category.description) { %><p><%= category.description %></p><% } %>
+  </div>
+
+  <% if (articles.length === 0) { %>
+    <div class="empty-state"><p>No articles in this category yet.</p></div>
+  <% } else { %>
+    <div class="article-grid">
+      <% articles.forEach(function(article) { %>
+        <%- include('../partials/article-card', { article }) %>
+      <% }) %>
+    </div>
+    <%- include('../partials/pagination') %>
+  <% } %>
+</div>

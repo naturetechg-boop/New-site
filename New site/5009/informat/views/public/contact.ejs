@@ -1,0 +1,40 @@
+<div class="container">
+  <div class="page-header">
+    <h1>Contact</h1>
+    <p>Have a tip, a correction, or a question? Send us a message.</p>
+  </div>
+
+  <div style="max-width: 560px; padding-bottom: 3rem;">
+    <% if (typeof submitted !== 'undefined' && submitted) { %>
+      <div class="alert alert-success">Thanks — your message has been sent. We'll get back to you soon.</div>
+    <% } %>
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <form action="/contact" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="form-field">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required maxlength="200">
+      </div>
+      <div class="form-field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required maxlength="200">
+      </div>
+      <div class="form-field">
+        <label for="subject">Subject</label>
+        <input type="text" id="subject" name="subject" maxlength="200" placeholder="General inquiry">
+      </div>
+      <div class="form-field">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="6" required maxlength="5000"></textarea>
+      </div>
+      <button type="submit" class="btn">Send message</button>
+    </form>
+
+    <% if (site.contactEmail) { %>
+      <p style="margin-top: 1.5rem; color: var(--color-muted); font-size: 0.9rem;">Or email us directly at <a href="mailto:<%= site.contactEmail %>" style="text-decoration: underline;"><%= site.contactEmail %></a>.</p>
+    <% } %>
+  </div>
+</div>

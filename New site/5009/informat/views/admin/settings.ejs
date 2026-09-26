@@ -1,0 +1,49 @@
+<div class="admin-topbar"><h1>Settings</h1></div>
+
+<% if (saved) { %><div class="alert alert-success">Settings saved.</div><% } %>
+
+<form action="/admin/settings" method="POST">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+  <div class="panel">
+    <h2>Site identity</h2>
+    <div class="field">
+      <label for="siteName">Site name</label>
+      <input type="text" id="siteName" name="siteName" value="<%= settings.siteName %>" placeholder="Informat">
+    </div>
+    <div class="field">
+      <label for="tagline">Tagline</label>
+      <input type="text" id="tagline" name="tagline" value="<%= settings.tagline %>" placeholder="Clear-eyed reporting on markets, money and technology.">
+    </div>
+    <div class="field">
+      <label for="contactEmail">Contact email</label>
+      <input type="text" id="contactEmail" name="contactEmail" value="<%= settings.contactEmail %>">
+    </div>
+    <div class="field">
+      <label for="aboutContent">About page content</label>
+      <textarea id="aboutContent" name="aboutContent" rows="6" placeholder="Separate paragraphs with a blank line."><%= settings.aboutContent %></textarea>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Social links</h2>
+    <div class="form-grid cols-2">
+      <div class="field"><label for="socialTwitter">Twitter / X URL</label><input type="url" id="socialTwitter" name="socialTwitter" value="<%= settings.socialTwitter %>"></div>
+      <div class="field"><label for="socialFacebook">Facebook URL</label><input type="url" id="socialFacebook" name="socialFacebook" value="<%= settings.socialFacebook %>"></div>
+    </div>
+    <div class="field"><label for="socialLinkedin">LinkedIn URL</label><input type="url" id="socialLinkedin" name="socialLinkedin" value="<%= settings.socialLinkedin %>"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Google Search Console</h2>
+    <div class="field">
+      <label for="googleSiteVerificationMeta">Meta tag verification code</label>
+      <input type="text" id="googleSiteVerificationMeta" name="googleSiteVerificationMeta" value="<%= settings.googleSiteVerificationMeta %>" placeholder="Paste the content value Google gives you">
+      <p class="hint">Alternatively, use the HTML-file verification method via the GOOGLE_SITE_VERIFICATION_FILE environment variable. See the README for both options.</p>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button type="submit" class="btn">Save settings</button>
+  </div>
+</form>

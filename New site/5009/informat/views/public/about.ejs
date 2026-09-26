@@ -1,0 +1,13 @@
+<div class="container">
+  <div class="prose">
+    <h1>About <%= site.siteName %></h1>
+    <% if (settingsDoc.aboutContent) { %>
+      <% settingsDoc.aboutContent.split('\n\n').forEach(function(paragraph) { %>
+        <p><%= paragraph %></p>
+      <% }) %>
+    <% } else { %>
+      <p><%= site.siteName %> is an independent publication covering forex, crypto, finance, business and technology. We focus on clear, useful reporting and analysis rather than noise.</p>
+      <p>This page can be edited from the admin dashboard under Settings.</p>
+    <% } %>
+  </div>
+</div>

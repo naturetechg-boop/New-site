@@ -1,0 +1,24 @@
+<%
+  const imgSrc = article.featuredImage && (article.featuredImage.url || (article.featuredImage.fileId ? `/media/${article.featuredImage.fileId}` : ''));
+%>
+<article class="article-card">
+  <a href="/article/<%= article.slug %>">
+    <% if (imgSrc) { %>
+      <img class="card-image" src="<%= imgSrc %>" alt="<%= article.featuredImage.altText || article.title %>" loading="lazy">
+    <% } %>
+  </a>
+  <% if (article.category) { %>
+    <a href="/category/<%= article.category.slug %>" class="category-tag"><%= article.category.name %></a>
+  <% } %>
+  <h3><a href="/article/<%= article.slug %>"><%= article.title %></a></h3>
+  <% if (article.excerpt) { %>
+    <p class="excerpt"><%= article.excerpt %></p>
+  <% } %>
+  <div class="article-meta">
+    <span><%= article.author %></span>
+    <% if (article.publishedAt) { %>
+      <span class="dot"><%= new Date(article.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></span>
+    <% } %>
+    <span class="dot"><%= article.readingTimeMinutes %> min read</span>
+  </div>
+</article>

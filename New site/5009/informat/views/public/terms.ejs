@@ -1,0 +1,24 @@
+<div class="container">
+  <div class="prose">
+    <h1>Terms &amp; Disclaimer</h1>
+    <p>Last updated: <%= new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+
+    <h2>Use of this site</h2>
+    <p>By accessing <%= site.siteName %>, you agree to use the site for lawful purposes only. Content published here may not be republished or redistributed without permission, except for brief quotations with attribution.</p>
+
+    <h2>Editorial disclaimer</h2>
+    <p>Articles on this site covering forex, crypto, finance, markets or business are provided for general informational purposes only and do not constitute financial, investment, legal or professional advice. Markets are volatile and past performance is not indicative of future results. Always do your own research and consult a qualified professional before making financial decisions.</p>
+
+    <h2>Accuracy of information</h2>
+    <p>We aim for accuracy but make no warranties, express or implied, about the completeness or reliability of the information published. We are not liable for any loss or damage arising from reliance on content published on this site.</p>
+
+    <h2>External links</h2>
+    <p>This site may link to third-party websites. We are not responsible for the content or practices of external sites.</p>
+
+    <h2>Changes</h2>
+    <p>We may revise these terms at any time. Continued use of the site after changes constitutes acceptance of the revised terms.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about these terms can be sent to <a href="mailto:<%= site.contactEmail %>" style="text-decoration:underline;"><%= site.contactEmail %></a>.</p>
+  </div>
+</div>

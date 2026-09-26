@@ -1,0 +1,36 @@
+<div class="admin-topbar">
+  <h1>Account</h1>
+</div>
+
+<div class="panel" style="max-width: 480px;">
+  <h2>Signed in as</h2>
+  <p><%= user.name %> — <%= user.email %></p>
+</div>
+
+<div class="panel" style="max-width: 480px;">
+  <h2>Change password</h2>
+  <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+  <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
+  <form action="/admin/account/password" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="field">
+      <label for="currentPassword">Current password</label>
+      <input type="password" id="currentPassword" name="currentPassword" required>
+    </div>
+    <div class="field">
+      <label for="newPassword">New password</label>
+      <input type="password" id="newPassword" name="newPassword" required minlength="10">
+      <p class="hint">At least 10 characters.</p>
+    </div>
+    <div class="field">
+      <label for="confirmPassword">Confirm new password</label>
+      <input type="password" id="confirmPassword" name="confirmPassword" required minlength="10">
+    </div>
+    <button type="submit" class="btn">Update password</button>
+  </form>
+</div>
+
+<div class="panel" style="max-width: 480px;">
+  <h2>Forgot your password?</h2>
+  <p class="hint">If you're locked out, run <code>npm run create-admin</code> from your local machine or a Render shell with the same admin email — it will securely reset the password for that account. See the README for details.</p>
+</div>

@@ -1,0 +1,104 @@
+<div class="admin-topbar"><h1>Analytics</h1></div>
+
+<% if (!hasData) { %>
+  <div class="panel">
+    <div class="empty-state">Not enough data yet. Analytics will appear here once your site starts receiving visitors.</div>
+  </div>
+<% } else { %>
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="label">Page views (30d)</div><div class="value"><%= totalViews30d %></div></div>
+  <div class="stat-card"><div class="label">Unique visitors (30d, est.)</div><div class="value"><%= uniqueVisitors30d %></div></div>
+</div>
+
+<div class="panel">
+  <h2>Traffic over time (last 30 days)</h2>
+  <% const maxDay = Math.max(...byDay.map(d => d.count), 1); %>
+  <% byDay.forEach(function(d) { %>
+    <div class="bar-row">
+      <span class="bar-label"><%= d._id %></span>
+      <div class="bar-track"><div class="bar-fill" style="width: <%= Math.round((d.count / maxDay) * 100) %>%;"></div></div>
+      <span class="bar-value"><%= d.count %></span>
+    </div>
+  <% }) %>
+</div>
+
+<div class="panel">
+  <h2>Visitors by country</h2>
+  <% byCountry.forEach(function(c) { %>
+    <div class="bar-row">
+      <span class="bar-label"><%= c.country %></span>
+      <div class="bar-track"><div class="bar-fill" style="width: <%= c.percent %>%;"></div></div>
+      <span class="bar-value"><%= c.percent %>%</span>
+    </div>
+  <% }) %>
+  <p class="hint">Location is estimated at country level from IP address at request time. No IP addresses are stored.</p>
+</div>
+
+<div class="form-grid cols-2">
+  <div class="panel">
+    <h2>Device type</h2>
+    <% const maxDevice = Math.max(...byDevice.map(d => d.count), 1); %>
+    <% byDevice.forEach(function(d) { %>
+      <div class="bar-row">
+        <span class="bar-label"><%= d._id %></span>
+        <div class="bar-track"><div class="bar-fill" style="width: <%= Math.round((d.count / maxDevice) * 100) %>%;"></div></div>
+        <span class="bar-value"><%= d.count %></span>
+      </div>
+    <% }) %>
+  </div>
+  <div class="panel">
+    <h2>Browser</h2>
+    <% const maxBrowser = Math.max(...byBrowser.map(d => d.count), 1); %>
+    <% byBrowser.forEach(function(d) { %>
+      <div class="bar-row">
+        <span class="bar-label"><%= d._id %></span>
+        <div class="bar-track"><div class="bar-fill" style="width: <%= Math.round((d.count / maxBrowser) * 100) %>%;"></div></div>
+        <span class="bar-value"><%= d.count %></span>
+      </div>
+    <% }) %>
+  </div>
+</div>
+
+<div class="form-grid cols-2">
+  <div class="panel">
+    <h2>Operating system</h2>
+    <% const maxOs = Math.max(...byOs.map(d => d.count), 1); %>
+    <% byOs.forEach(function(d) { %>
+      <div class="bar-row">
+        <span class="bar-label"><%= d._id %></span>
+        <div class="bar-track"><div class="bar-fill" style="width: <%= Math.round((d.count / maxOs) * 100) %>%;"></div></div>
+        <span class="bar-value"><%= d.count %></span>
+      </div>
+    <% }) %>
+  </div>
+  <div class="panel">
+    <h2>Top referrers</h2>
+    <% const maxRef = Math.max(...byReferrer.map(d => d.count), 1); %>
+    <% byReferrer.forEach(function(d) { %>
+      <div class="bar-row">
+        <span class="bar-label"><%= d._id %></span>
+        <div class="bar-track"><div class="bar-fill" style="width: <%= Math.round((d.count / maxRef) * 100) %>%;"></div></div>
+        <span class="bar-value"><%= d.count %></span>
+      </div>
+    <% }) %>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Most viewed articles (all time)</h2>
+  <% if (topArticles.length === 0) { %>
+    <div class="empty-state">Not enough data yet.</div>
+  <% } else { %>
+    <table>
+      <thead><tr><th>Title</th><th>Views</th></tr></thead>
+      <tbody>
+        <% topArticles.forEach(function(a) { %>
+          <tr><td><%= a.title %></td><td><%= a.viewCount %></td></tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+<% } %>

@@ -1,0 +1,53 @@
+<%
+  const imgSrc = article.featuredImage && (article.featuredImage.url || (article.featuredImage.fileId ? `/media/${article.featuredImage.fileId}` : ''));
+%>
+<div class="article-page">
+  <div class="container">
+    <header class="article-header">
+      <a href="/category/<%= article.category.slug %>" class="category-tag"><%= article.category.name %></a>
+      <h1><%= article.title %></h1>
+      <% if (article.subtitle) { %>
+        <p class="subtitle"><%= article.subtitle %></p>
+      <% } %>
+      <div class="article-meta">
+        <span>By <%= article.author %></span>
+        <span class="dot"><%= new Date(article.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+        <span class="dot"><%= article.readingTimeMinutes %> min read</span>
+        <% if (article.updatedAt && article.publishedAt && new Date(article.updatedAt) - new Date(article.publishedAt) > 86400000) { %>
+          <span class="dot">Updated <%= new Date(article.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+        <% } %>
+      </div>
+    </header>
+
+    <% if (imgSrc) { %>
+      <div class="article-featured-image">
+        <img src="<%= imgSrc %>" alt="<%= article.featuredImage.altText || article.title %>">
+      </div>
+    <% } %>
+
+    <div class="article-body">
+      <%- article.contentHtml %>
+    </div>
+
+    <% if (article.tags && article.tags.length > 0) { %>
+      <div class="article-tags">
+        <% article.tags.forEach(function(tag) { %>
+          <a href="/search?q=<%= encodeURIComponent(tag.name) %>">#<%= tag.name %></a>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+
+  <% if (relatedArticles.length > 0) { %>
+    <div class="container">
+      <section class="related-section">
+        <div class="section-label">Related reading</div>
+        <div class="article-grid" style="padding-top: 0;">
+          <% relatedArticles.forEach(function(related) { %>
+            <%- include('../partials/article-card', { article: related }) %>
+          <% }) %>
+        </div>
+      </section>
+    </div>
+  <% } %>
+</div>

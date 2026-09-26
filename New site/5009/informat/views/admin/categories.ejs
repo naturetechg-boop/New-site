@@ -1,0 +1,56 @@
+<div class="admin-topbar"><h1>Categories</h1></div>
+
+<% if (typeof error !== 'undefined' && error) { %>
+  <div class="alert alert-error"><%= error %></div>
+<% } %>
+
+<div class="panel" style="max-width: 480px;">
+  <h2>Add a category</h2>
+  <form action="/admin/categories" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="field">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" required placeholder="e.g. Forex">
+    </div>
+    <div class="field">
+      <label for="description">Description (optional)</label>
+      <input type="text" id="description" name="description">
+    </div>
+    <button type="submit" class="btn">Add category</button>
+  </form>
+</div>
+
+<div class="panel">
+  <h2>All categories</h2>
+  <% if (categories.length === 0) { %>
+    <div class="empty-state">No categories yet.</div>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Name</th><th>Slug</th><th>Articles</th><th>Actions</th></tr></thead>
+        <tbody>
+          <% categories.forEach(function(cat) { %>
+            <tr>
+              <td>
+                <form action="/admin/categories/<%= cat._id %>" method="POST" style="display:flex; gap:0.4rem;">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <input type="text" name="name" value="<%= cat.name %>" style="max-width:180px;">
+                  <input type="text" name="description" value="<%= cat.description || '' %>" placeholder="Description" style="max-width:200px;">
+                  <button type="submit" class="btn btn-secondary">Save</button>
+                </form>
+              </td>
+              <td>/category/<%= cat.slug %></td>
+              <td><%= cat.articleCount %></td>
+              <td>
+                <form action="/admin/categories/<%= cat._id %>/delete" method="POST" onsubmit="return confirm('Delete this category?');">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button type="submit" class="danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>

@@ -1,0 +1,31 @@
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <h4><%= site.siteName %></h4>
+        <p style="color: var(--color-ink-soft); font-size: 0.9rem; max-width: 320px;"><%= site.tagline %></p>
+      </div>
+      <div>
+        <h4>Sections</h4>
+        <ul>
+          <% site.footerCategories.forEach(function(slug) { %>
+            <li><a href="/category/<%= slug %>"><%= slug.charAt(0).toUpperCase() + slug.slice(1) %></a></li>
+          <% }) %>
+        </ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="/about">About</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/privacy">Privacy Policy</a></li>
+          <li><a href="/terms">Terms &amp; Disclaimer</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; <%= new Date().getFullYear() %> <%= site.siteName %>. All rights reserved.</span>
+      <span>Built for readers who want clarity, not noise.</span>
+    </div>
+  </div>
+</footer>

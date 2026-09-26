@@ -1,0 +1,125 @@
+<div class="admin-topbar">
+  <h1><%= article && article._id ? 'Edit Article' : 'New Article' %></h1>
+  <% if (article && article.slug) { %>
+    <a href="/article/<%= article.slug %>" target="_blank" rel="noopener" class="btn btn-secondary">Preview live</a>
+  <% } %>
+</div>
+
+<% if (typeof error !== 'undefined' && error) { %>
+  <div class="alert alert-error"><%= error %></div>
+<% } %>
+
+<form action="<%= article && article._id ? `/admin/articles/${article._id}` : '/admin/articles' %>" method="POST" id="article-form">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <input type="hidden" name="featuredImageFileId" id="featuredImageFileId" value="<%= (article && article.featuredImage && article.featuredImage.fileId) || '' %>">
+
+  <div class="panel">
+    <div class="field">
+      <label for="title">Title</label>
+      <input type="text" id="title" name="title" required value="<%= article ? article.title : '' %>">
+    </div>
+    <div class="field">
+      <label for="subtitle">Subtitle / excerpt hook</label>
+      <input type="text" id="subtitle" name="subtitle" value="<%= article ? article.subtitle : '' %>">
+    </div>
+    <div class="form-grid cols-2">
+      <div class="field">
+        <label for="author">Author</label>
+        <input type="text" id="author" name="author" value="<%= article ? article.author : 'Staff Writer' %>">
+      </div>
+      <div class="field">
+        <label for="category">Category</label>
+        <select id="category" name="category" required>
+          <option value="">Select a category…</option>
+          <% categories.forEach(function(cat) { %>
+            <option value="<%= cat._id %>" <%= article && article.category && String(article.category._id || article.category) === String(cat._id) ? 'selected' : '' %>><%= cat.name %></option>
+          <% }) %>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label for="tags">Tags (comma-separated)</label>
+      <input type="text" id="tags" name="tags" value="<%= tagsValue %>" placeholder="e.g. naira, inflation, cbn">
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="field">
+      <label for="featuredImageUrl">Featured image URL</label>
+      <input type="url" id="featuredImageUrl" name="featuredImageUrl" value="<%= article && article.featuredImage ? article.featuredImage.url : '' %>" placeholder="https://…">
+      <p class="hint">Or upload an image below (it will be stored in the database so it survives Render restarts).</p>
+    </div>
+    <div class="field">
+      <label for="featuredImageFile">Upload featured image</label>
+      <input type="file" id="featuredImageFile" accept="image/*">
+      <div id="upload-status" class="hint"></div>
+      <div id="upload-preview" style="margin-top:0.6rem;"></div>
+    </div>
+    <div class="field">
+      <label for="featuredImageAlt">Image alt text</label>
+      <input type="text" id="featuredImageAlt" name="featuredImageAlt" value="<%= article && article.featuredImage ? article.featuredImage.altText : '' %>" placeholder="Describe the image for accessibility">
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="field">
+      <label for="contentMarkdown">Article content (Markdown)</label>
+      <textarea id="contentMarkdown" name="contentMarkdown" rows="18"><%= article ? article.contentMarkdown : '' %></textarea>
+    </div>
+    <div class="field">
+      <label for="excerpt">Excerpt (leave blank to auto-generate)</label>
+      <textarea id="excerpt" name="excerpt" rows="2"><%= article ? article.excerpt : '' %></textarea>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>SEO</h2>
+    <div class="field">
+      <label for="seoTitle">SEO title</label>
+      <input type="text" id="seoTitle" name="seoTitle" value="<%= article ? article.seoTitle : '' %>" placeholder="Defaults to the article title">
+    </div>
+    <div class="field">
+      <label for="seoDescription">SEO description</label>
+      <textarea id="seoDescription" name="seoDescription" rows="2" placeholder="Defaults to the excerpt"><%= article ? article.seoDescription : '' %></textarea>
+    </div>
+    <div class="field">
+      <label for="slug">URL slug</label>
+      <input type="text" id="slug" name="slug" value="<%= article ? article.slug : '' %>" placeholder="auto-generated-from-title">
+      <p class="hint">Final URL: <%= typeof site !== 'undefined' ? site.siteUrl : '' %>/article/&lt;slug&gt;</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Publishing</h2>
+    <div class="checkbox-row">
+      <input type="checkbox" id="isFeatured" name="isFeatured" <%= article && article.isFeatured ? 'checked' : '' %>>
+      <label for="isFeatured" style="margin:0;">Featured on homepage</label>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="isTrending" name="isTrending" <%= article && article.isTrending ? 'checked' : '' %>>
+      <label for="isTrending" style="margin:0;">Mark as trending</label>
+    </div>
+    <div class="field">
+      <label for="status">Status</label>
+      <select id="status" name="status">
+        <option value="draft" <%= !article || article.status === 'draft' ? 'selected' : '' %>>Draft</option>
+        <option value="published" <%= article && article.status === 'published' ? 'selected' : '' %>>Published</option>
+        <option value="scheduled" <%= article && article.status === 'scheduled' ? 'selected' : '' %>>Scheduled</option>
+      </select>
+    </div>
+    <div class="field" id="scheduled-field" style="<%= article && article.status === 'scheduled' ? '' : 'display:none;' %>">
+      <label for="scheduledFor">Scheduled for</label>
+      <input type="datetime-local" id="scheduledFor" name="scheduledFor" value="<%= article && article.scheduledFor ? new Date(article.scheduledFor).toISOString().slice(0,16) : '' %>">
+      <p class="hint">Note: scheduled articles need the status changed to "Published" manually or via a scheduled job once the time arrives.</p>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button type="submit" class="btn">Save article</button>
+    <a href="/admin/articles" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+<script src="/js/article-form.js" defer></script>

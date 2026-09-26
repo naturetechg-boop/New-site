@@ -1,0 +1,41 @@
+<div class="container">
+  <div class="prose">
+    <h1>Privacy Policy</h1>
+    <p>Last updated: <%= new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+
+    <p>This Privacy Policy explains what information <%= site.siteName %> collects when you visit this website, and how that information is used.</p>
+
+    <h2>Analytics we collect</h2>
+    <p>We run our own, privacy-conscious analytics directly on this server. We do not use third-party trackers such as Google Analytics, and we do not sell or share visitor data with advertisers.</p>
+    <p>For each page view, we may record:</p>
+    <ul>
+      <li>The page visited and the date/time</li>
+      <li>An approximate, country-level location, derived from your IP address at the moment of the request</li>
+      <li>General device, browser and operating system type (e.g. "mobile", "Chrome", "Android")</li>
+      <li>The referring website, if any</li>
+    </ul>
+
+    <h2>What we do not do</h2>
+    <ul>
+      <li>We do not store your IP address. It is used only for a brief moment to estimate your country, and to generate a one-way, non-reversible daily hash used solely to estimate unique visitor counts.</li>
+      <li>That hash changes every day, so it cannot be used to track you across days or build a profile of your browsing.</li>
+      <li>We do not display or expose visitor IP addresses anywhere on the public website.</li>
+      <li>We do not use cookies for advertising or cross-site tracking. A session cookie is used only for admin login and, where applicable, to remember your search query.</li>
+    </ul>
+
+    <h2>Contact form</h2>
+    <p>If you submit the contact form, we store the name, email address, subject and message you provide so we can respond to you. This information is only visible to the site administrators.</p>
+
+    <h2>Data retention</h2>
+    <p>Aggregated, anonymous analytics data is retained to help us understand overall traffic trends. Contact form submissions are retained until an administrator deletes them.</p>
+
+    <h2>Your rights</h2>
+    <p>Because we do not collect direct personal identifiers through analytics, there is no personal analytics profile to access or delete. If you contacted us through the contact form and would like your message removed, please email us at <%= site.contactEmail %>.</p>
+
+    <h2>Changes to this policy</h2>
+    <p>We may update this policy from time to time as the site evolves. Changes will be posted on this page.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about this policy can be sent to <a href="mailto:<%= site.contactEmail %>" style="text-decoration:underline;"><%= site.contactEmail %></a>.</p>
+  </div>
+</div>

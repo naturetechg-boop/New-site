@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %> · Admin · Informat</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <% if (typeof isLoginPage === 'undefined' || !isLoginPage) { %>
+  <div class="admin-shell">
+    <aside class="admin-sidebar">
+      <div class="brand">Informat Admin</div>
+      <ul class="admin-nav-list">
+        <li><a href="/admin" class="<%= title === 'Dashboard' ? 'is-active' : '' %>">Dashboard</a></li>
+        <li><a href="/admin/articles" class="<%= title === 'Articles' || title === 'New Article' || title === 'Edit Article' ? 'is-active' : '' %>">Articles</a></li>
+        <li><a href="/admin/articles/new">Create Article</a></li>
+        <li><a href="/admin/categories" class="<%= title === 'Categories' ? 'is-active' : '' %>">Categories</a></li>
+        <li><a href="/admin/trending" class="<%= title === 'Trending Articles' ? 'is-active' : '' %>">Trending</a></li>
+        <li><a href="/admin/media" class="<%= title === 'Media Library' ? 'is-active' : '' %>">Media</a></li>
+        <li><a href="/admin/announcements" class="<%= title === 'Announcements' ? 'is-active' : '' %>">Announcements</a></li>
+        <li><a href="/admin/messages" class="<%= title === 'Messages' ? 'is-active' : '' %>">Messages</a></li>
+        <li><a href="/admin/analytics" class="<%= title === 'Analytics' ? 'is-active' : '' %>">Analytics</a></li>
+        <li><a href="/admin/settings" class="<%= title === 'Settings' ? 'is-active' : '' %>">Settings</a></li>
+        <li><a href="/admin/account" class="<%= title === 'Account' ? 'is-active' : '' %>">Account</a></li>
+      </ul>
+      <form action="/admin/logout" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="logout-btn" type="submit">Log out</button>
+      </form>
+    </aside>
+    <main class="admin-main">
+      <%- body %>
+    </main>
+  </div>
+  <% } else { %>
+    <%- body %>
+  <% } %>
+</body>
+</html>

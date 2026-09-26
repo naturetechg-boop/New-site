@@ -1,0 +1,37 @@
+<div class="admin-topbar"><h1>Messages</h1></div>
+
+<div class="panel">
+  <% if (messages.length === 0) { %>
+    <div class="empty-state">No messages yet.</div>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>From</th><th>Subject</th><th>Message</th><th>Received</th><th>Actions</th></tr></thead>
+        <tbody>
+          <% messages.forEach(function(m) { %>
+            <tr style="<%= m.isRead ? '' : 'font-weight:600;' %>">
+              <td><%= m.name %><br><span style="font-weight:400; color: var(--a-muted); font-size:0.8rem;"><%= m.email %></span></td>
+              <td><%= m.subject %></td>
+              <td style="max-width:320px;"><%= m.message %></td>
+              <td><%= new Date(m.createdAt).toLocaleDateString() %></td>
+              <td>
+                <div class="row-actions">
+                  <% if (!m.isRead) { %>
+                    <form action="/admin/messages/<%= m._id %>/read" method="POST">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <button type="submit">Mark read</button>
+                    </form>
+                  <% } %>
+                  <form action="/admin/messages/<%= m._id %>/delete" method="POST" onsubmit="return confirm('Delete this message?');">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="danger">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>

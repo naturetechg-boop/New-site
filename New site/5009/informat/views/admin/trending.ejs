@@ -1,0 +1,30 @@
+<div class="admin-topbar"><h1>Trending Articles</h1></div>
+
+<div class="panel">
+  <p class="hint" style="margin-bottom:1rem;">Manually control which published articles show in the homepage "Trending now" section.</p>
+  <% if (articles.length === 0) { %>
+    <div class="empty-state">No published articles yet.</div>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Title</th><th>Category</th><th>Views</th><th>Trending</th><th></th></tr></thead>
+        <tbody>
+          <% articles.forEach(function(a) { %>
+            <tr>
+              <td><%= a.title %></td>
+              <td><%= a.category ? a.category.name : '—' %></td>
+              <td><%= a.viewCount %></td>
+              <td><% if (a.isTrending) { %><span class="badge badge-trending">Trending</span><% } %></td>
+              <td>
+                <form action="/admin/articles/<%= a._id %>/toggle-trending" method="POST">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button type="submit" class="btn btn-secondary"><%= a.isTrending ? 'Remove from trending' : 'Mark as trending' %></button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>

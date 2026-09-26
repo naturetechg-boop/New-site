@@ -1,0 +1,58 @@
+<div class="admin-login-wrap">
+  <div class="admin-login-card" style="max-width: 440px;">
+    <div class="brand">Informat</div>
+    <div class="subtitle">First-time admin setup</div>
+
+    <% if (alreadySetUp) { %>
+      <div class="alert alert-error">
+        An admin account already exists, so this setup page is now permanently disabled.
+        Go to <a href="/admin/login" style="text-decoration:underline;">/admin/login</a> to sign in,
+        or use "npm run create-admin" (from a shell, if you have one) to reset a password.
+      </div>
+    <% } else if (tokenMissing) { %>
+      <div class="alert alert-error">
+        No <code>SETUP_TOKEN</code> environment variable is set, so this page is locked for safety.
+        Set a <code>SETUP_TOKEN</code> (any long random string) in your environment variables, redeploy,
+        then reload this page with <code>?token=YOUR_TOKEN</code> appended to the URL.
+      </div>
+    <% } else if (tokenInvalid) { %>
+      <div class="alert alert-error">
+        That setup link is missing or incorrect. Reload this page with
+        <code>?token=YOUR_SETUP_TOKEN</code> appended to the URL, matching the
+        <code>SETUP_TOKEN</code> environment variable you set.
+      </div>
+    <% } else { %>
+      <p class="subtitle" style="margin-bottom: 1.2rem;">
+        No admin account exists yet. Create the first one below — this page will
+        refuse to create another account once this one is saved.
+      </p>
+
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-error"><%= error %></div>
+      <% } %>
+
+      <form action="/admin/setup" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="token" value="<%= locals.formToken || '' %>">
+        <div class="field">
+          <label for="name">Your name</label>
+          <input type="text" id="name" name="name" required autofocus>
+        </div>
+        <div class="field">
+          <label for="email">Admin email</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required minlength="10">
+          <p class="hint">At least 10 characters.</p>
+        </div>
+        <div class="field">
+          <label for="confirmPassword">Confirm password</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" required minlength="10">
+        </div>
+        <button type="submit" class="btn btn-block">Create admin account</button>
+      </form>
+    <% } %>
+  </div>
+</div>

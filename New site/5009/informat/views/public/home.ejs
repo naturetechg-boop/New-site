@@ -1,0 +1,93 @@
+<section class="container">
+  <div class="hero-section">
+    <% if (heroArticle) { %>
+      <article class="hero-article">
+        <%
+          const heroImg = heroArticle.featuredImage && (heroArticle.featuredImage.url || (heroArticle.featuredImage.fileId ? `/media/${heroArticle.featuredImage.fileId}` : ''));
+        %>
+        <a href="/article/<%= heroArticle.slug %>">
+          <% if (heroImg) { %>
+            <img class="hero-image" src="<%= heroImg %>" alt="<%= heroArticle.featuredImage.altText || heroArticle.title %>">
+          <% } %>
+        </a>
+        <% if (heroArticle.category) { %>
+          <a href="/category/<%= heroArticle.category.slug %>" class="category-tag"><%= heroArticle.category.name %></a>
+        <% } %>
+        <h1><a href="/article/<%= heroArticle.slug %>"><%= heroArticle.title %></a></h1>
+        <% if (heroArticle.excerpt) { %>
+          <p class="excerpt"><%= heroArticle.excerpt %></p>
+        <% } %>
+        <div class="article-meta">
+          <span><%= heroArticle.author %></span>
+          <span class="dot"><%= new Date(heroArticle.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></span>
+          <span class="dot"><%= heroArticle.readingTimeMinutes %> min read</span>
+        </div>
+      </article>
+    <% } else { %>
+      <div class="empty-state">
+        <p>No articles published yet. Once you publish your first article from the admin panel, it will appear here.</p>
+      </div>
+    <% } %>
+
+    <% if (latestArticles.length > 0) { %>
+      <div class="latest-list">
+        <div class="section-label">Latest</div>
+        <% latestArticles.forEach(function(article) { %>
+          <%
+            const imgSrc = article.featuredImage && (article.featuredImage.url || (article.featuredImage.fileId ? `/media/${article.featuredImage.fileId}` : ''));
+          %>
+          <div class="latest-list-item">
+            <% if (imgSrc) { %>
+              <a href="/article/<%= article.slug %>"><img src="<%= imgSrc %>" alt="<%= article.featuredImage.altText || article.title %>" loading="lazy"></a>
+            <% } %>
+            <div>
+              <h3><a href="/article/<%= article.slug %>"><%= article.title %></a></h3>
+              <div class="article-meta">
+                <span><%= article.category ? article.category.name : '' %></span>
+                <span class="dot"><%= article.readingTimeMinutes %> min read</span>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<% if (trendingArticles.length > 0) { %>
+<section class="trending-section">
+  <div class="container">
+    <div class="section-label">Trending now</div>
+    <ul class="trending-list">
+      <% trendingArticles.forEach(function(article, index) { %>
+        <li class="trending-item">
+          <span class="trending-rank"><%= String(index + 1).padStart(2, '0') %></span>
+          <div>
+            <h3><a href="/article/<%= article.slug %>"><%= article.title %></a></h3>
+            <div class="article-meta">
+              <span><%= article.category ? article.category.name : '' %></span>
+              <span class="dot"><%= article.readingTimeMinutes %> min read</span>
+            </div>
+          </div>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+</section>
+<% } %>
+
+<% categorySections.forEach(function(section) { %>
+<section class="category-section">
+  <div class="container">
+    <div class="section-heading-row">
+      <div class="section-label" style="margin-bottom:0;"><%= section.category.name %></div>
+      <a class="see-all-link" href="/category/<%= section.category.slug %>">See all</a>
+    </div>
+    <div class="category-section-grid">
+      <% section.articles.forEach(function(article) { %>
+        <%- include('../partials/article-card', { article }) %>
+      <% }) %>
+    </div>
+  </div>
+</section>
+<% }) %>

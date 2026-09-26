@@ -1,0 +1,75 @@
+<%
+  const pageTitle = typeof title !== 'undefined' && title ? `${title} | ${site.siteName}` : `${site.siteName} — ${site.tagline}`;
+  const description = typeof metaDescription !== 'undefined' && metaDescription ? metaDescription : site.siteDescription;
+  const canonicalUrl = `${site.siteUrl.replace(/\/$/, '')}${typeof canonicalPath !== 'undefined' ? canonicalPath : ''}`;
+  const ogImageUrl = typeof ogImage !== 'undefined' && ogImage ? (ogImage.startsWith('http') ? ogImage : `${site.siteUrl.replace(/\/$/, '')}${ogImage}`) : `${site.siteUrl.replace(/\/$/, '')}${site.defaultOgImage}`;
+%>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title><%= pageTitle %></title>
+<meta name="description" content="<%= description %>">
+<link rel="canonical" href="<%= canonicalUrl %>">
+<% if (typeof noIndex !== 'undefined' && noIndex) { %>
+<meta name="robots" content="noindex, follow">
+<% } else { %>
+<meta name="robots" content="index, follow">
+<% } %>
+
+<!-- Open Graph -->
+<meta property="og:type" content="<%= typeof article !== 'undefined' ? 'article' : 'website' %>">
+<meta property="og:site_name" content="<%= site.siteName %>">
+<meta property="og:title" content="<%= pageTitle %>">
+<meta property="og:description" content="<%= description %>">
+<meta property="og:url" content="<%= canonicalUrl %>">
+<meta property="og:image" content="<%= ogImageUrl %>">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="<%= pageTitle %>">
+<meta name="twitter:description" content="<%= description %>">
+<meta name="twitter:image" content="<%= ogImageUrl %>">
+
+<% if (site.googleSiteVerificationMeta) { %>
+<meta name="google-site-verification" content="<%= site.googleSiteVerificationMeta %>">
+<% } %>
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📰</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/main.css">
+
+<% if (typeof article !== 'undefined' && article) { %>
+<script type="application/ld+json" nonce="<%= cspNonce %>">
+<%- JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": article.title,
+  "description": article.excerpt || description,
+  "author": { "@type": "Person", "name": article.author },
+  "datePublished": article.publishedAt,
+  "dateModified": article.updatedAt || article.publishedAt,
+  "image": ogImageUrl,
+  "publisher": {
+    "@type": "Organization",
+    "name": site.siteName
+  },
+  "mainEntityOfPage": canonicalUrl
+}) %>
+</script>
+<% } else { %>
+<script type="application/ld+json" nonce="<%= cspNonce %>">
+<%- JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": site.siteName,
+  "url": site.siteUrl,
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": `${site.siteUrl.replace(/\/$/, '')}/search?q={search_term_string}`,
+    "query-input": "required name=search_term_string"
+  }
+}) %>
+</script>
+<% } %>

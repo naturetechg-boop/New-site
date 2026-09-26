@@ -1,0 +1,17 @@
+<% if (totalPages > 1) { %>
+<nav class="pagination" aria-label="Pagination">
+  <% if (currentPage > 1) { %>
+    <a href="?page=<%= currentPage - 1 %>">Previous</a>
+  <% } %>
+  <% for (let p = 1; p <= totalPages; p++) { %>
+    <% if (p === currentPage) { %>
+      <span class="is-current"><%= p %></span>
+    <% } else { %>
+      <a href="?page=<%= p %>"><%= p %></a>
+    <% } %>
+  <% } %>
+  <% if (currentPage < totalPages) { %>
+    <a href="?page=<%= currentPage + 1 %>">Next</a>
+  <% } %>
+</nav>
+<% } %>

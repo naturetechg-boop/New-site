@@ -1,0 +1,18 @@
+<div class="container">
+  <div class="page-header">
+    <h1><%= query ? `Results for "${query}"` : 'Search' %></h1>
+    <% if (query) { %><p><%= articles.length %> article<%= articles.length === 1 ? '' : 's' %> found.</p><% } else { %>
+      <p>Search by title, content, category or tag.</p>
+    <% } %>
+  </div>
+
+  <% if (query && articles.length === 0) { %>
+    <div class="empty-state"><p>No articles matched your search. Try a different term.</p></div>
+  <% } else if (articles.length > 0) { %>
+    <div class="article-grid">
+      <% articles.forEach(function(article) { %>
+        <%- include('../partials/article-card', { article }) %>
+      <% }) %>
+    </div>
+  <% } %>
+</div>

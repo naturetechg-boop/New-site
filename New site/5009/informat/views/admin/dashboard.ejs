@@ -1,0 +1,55 @@
+<div class="admin-topbar">
+  <h1>Dashboard</h1>
+  <a href="/admin/articles/new" class="btn">Create Article</a>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="label">Total articles</div><div class="value"><%= stats.totalArticles %></div></div>
+  <div class="stat-card"><div class="label">Published</div><div class="value"><%= stats.published %></div></div>
+  <div class="stat-card"><div class="label">Drafts</div><div class="value"><%= stats.drafts %></div></div>
+  <div class="stat-card"><div class="label">Trending</div><div class="value"><%= stats.trendingCount %></div></div>
+  <div class="stat-card"><div class="label">Categories</div><div class="value"><%= stats.totalCategories %></div></div>
+  <div class="stat-card"><div class="label">Page views (30d)</div><div class="value"><%= stats.pageViewsLast30Days > 0 ? stats.pageViewsLast30Days : 'Not enough data yet' %></div></div>
+  <div class="stat-card"><div class="label">Unread messages</div><div class="value"><%= stats.unreadMessages %></div></div>
+</div>
+
+<div class="panel">
+  <h2>Recently updated articles</h2>
+  <% if (recentArticles.length === 0) { %>
+    <div class="empty-state">No articles yet. <a href="/admin/articles/new">Create your first article</a>.</div>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Title</th><th>Category</th><th>Status</th><th>Updated</th></tr></thead>
+        <tbody>
+          <% recentArticles.forEach(function(a) { %>
+            <tr>
+              <td><a href="/admin/articles/<%= a._id %>/edit"><%= a.title %></a></td>
+              <td><%= a.category ? a.category.name : '—' %></td>
+              <td><span class="badge badge-<%= a.status %>"><%= a.status %></span></td>
+              <td><%= new Date(a.updatedAt).toLocaleDateString() %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<div class="panel">
+  <h2>Most viewed published articles</h2>
+  <% if (topArticles.length === 0 || topArticles.every(a => a.viewCount === 0)) { %>
+    <div class="empty-state">Not enough data yet.</div>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Title</th><th>Views</th></tr></thead>
+        <tbody>
+          <% topArticles.forEach(function(a) { %>
+            <tr><td><a href="/article/<%= a.slug %>" target="_blank" rel="noopener">↗ <%= a.title %></a></td><td><%= a.viewCount %></td></tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>

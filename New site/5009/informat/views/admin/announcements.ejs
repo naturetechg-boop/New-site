@@ -1,0 +1,69 @@
+<div class="admin-topbar"><h1>Announcements</h1></div>
+
+<div class="panel" style="max-width: 560px;">
+  <h2>Create announcement</h2>
+  <form action="/admin/announcements" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="field">
+      <label for="message">Message</label>
+      <input type="text" id="message" name="message" required placeholder="e.g. We've launched our new Markets newsletter.">
+    </div>
+    <div class="form-grid cols-2">
+      <div class="field">
+        <label for="linkUrl">Link URL (optional)</label>
+        <input type="url" id="linkUrl" name="linkUrl">
+      </div>
+      <div class="field">
+        <label for="linkText">Link text (optional)</label>
+        <input type="text" id="linkText" name="linkText" placeholder="Learn more">
+      </div>
+    </div>
+    <div class="field">
+      <label for="style">Style</label>
+      <select id="style" name="style">
+        <option value="info">Info</option>
+        <option value="announcement">Announcement</option>
+        <option value="warning">Warning</option>
+      </select>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="makeActive" name="makeActive">
+      <label for="makeActive" style="margin:0;">Show this on the site now (replaces any currently active announcement)</label>
+    </div>
+    <button type="submit" class="btn">Create</button>
+  </form>
+</div>
+
+<div class="panel">
+  <h2>All announcements</h2>
+  <% if (announcements.length === 0) { %>
+    <div class="empty-state">No announcements yet.</div>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Message</th><th>Style</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          <% announcements.forEach(function(a) { %>
+            <tr>
+              <td><%= a.message %></td>
+              <td><%= a.style %></td>
+              <td><% if (a.isActive) { %><span class="badge badge-published">Live</span><% } else { %><span class="badge badge-draft">Hidden</span><% } %></td>
+              <td>
+                <div class="row-actions">
+                  <form action="/admin/announcements/<%= a._id %>/toggle" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit"><%= a.isActive ? 'Hide' : 'Show' %></button>
+                  </form>
+                  <form action="/admin/announcements/<%= a._id %>/delete" method="POST" onsubmit="return confirm('Delete this announcement?');">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="danger">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>

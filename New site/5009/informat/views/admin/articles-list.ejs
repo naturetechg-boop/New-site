@@ -1,0 +1,64 @@
+<div class="admin-topbar">
+  <h1>Articles</h1>
+  <a href="/admin/articles/new" class="btn">Create Article</a>
+</div>
+
+<div class="panel">
+  <div style="display:flex; gap:0.6rem; margin-bottom:1rem; flex-wrap:wrap;">
+    <a href="/admin/articles" class="btn <%= statusFilter === 'all' ? '' : 'btn-secondary' %>">All</a>
+    <a href="/admin/articles?status=published" class="btn <%= statusFilter === 'published' ? '' : 'btn-secondary' %>">Published</a>
+    <a href="/admin/articles?status=draft" class="btn <%= statusFilter === 'draft' ? '' : 'btn-secondary' %>">Drafts</a>
+    <a href="/admin/articles?status=scheduled" class="btn <%= statusFilter === 'scheduled' ? '' : 'btn-secondary' %>">Scheduled</a>
+  </div>
+
+  <% if (articles.length === 0) { %>
+    <div class="empty-state">No articles found. <a href="/admin/articles/new">Create one</a>.</div>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Title</th><th>Category</th><th>Status</th><th>Trending</th><th>Views</th><th>Updated</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          <% articles.forEach(function(a) { %>
+            <tr>
+              <td><a href="/admin/articles/<%= a._id %>/edit"><%= a.title %></a></td>
+              <td><%= a.category ? a.category.name : '—' %></td>
+              <td><span class="badge badge-<%= a.status %>"><%= a.status %></span></td>
+              <td><% if (a.isTrending) { %><span class="badge badge-trending">Trending</span><% } %></td>
+              <td><%= a.viewCount %></td>
+              <td><%= new Date(a.updatedAt).toLocaleDateString() %></td>
+              <td>
+                <div class="row-actions">
+                  <a class="link-btn" href="/admin/articles/<%= a._id %>/edit">Edit</a>
+                  <a class="link-btn" href="/article/<%= a.slug %>" target="_blank" rel="noopener">View</a>
+                  <form action="/admin/articles/<%= a._id %>/toggle-trending" method="POST" style="display:inline;">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit"><%= a.isTrending ? 'Untrend' : 'Trend' %></button>
+                  </form>
+                  <% if (a.status === 'published') { %>
+                    <form action="/admin/articles/<%= a._id %>/status" method="POST" style="display:inline;">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <input type="hidden" name="status" value="draft">
+                      <button type="submit">Unpublish</button>
+                    </form>
+                  <% } else { %>
+                    <form action="/admin/articles/<%= a._id %>/status" method="POST" style="display:inline;">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <input type="hidden" name="status" value="published">
+                      <button type="submit">Publish</button>
+                    </form>
+                  <% } %>
+                  <form action="/admin/articles/<%= a._id %>/delete" method="POST" style="display:inline;" onsubmit="return confirm('Delete this article? This cannot be undone.');">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="danger">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
