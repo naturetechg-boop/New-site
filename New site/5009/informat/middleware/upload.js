@@ -1,28 +1,24 @@
 const multer = require('multer');
-const { GridFsStorage } = require('multer-gridfs-storage');
 
-// IMPORTANT: Render's free plan uses an ephemeral filesystem - anything written
-// to local disk is lost on every restart/redeploy. We store uploaded media
-// inside MongoDB itself (GridFS) so images survive restarts and deploys.
-const storage = new GridFsStorage({
-  url: process.env.DATABASE_URL,
-  file: (req, file) => {
-    return {
-      bucketName: 'mediaFiles',
-      filename: `${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`,
-      metadata: { uploadedBy: req.session ? req.session.userId : null }
-    };
-  }
-});
-
-storage.on('connectionFailed', (err) => {
-  console.error('[upload] GridFS storage failed to connect:', err.message);
-});
+// IMPORTANT: we deliberately do NOT use the "multer-gridfs-storage" package
+// here. That package is effectively unmaintained and is known to silently
+// fail to persist files when paired with modern MongoDB driver versions
+// (the kind bundled with current Mongoose releases and used by MongoDB
+// Atlas) - uploads can appear to succeed in the browser while nothing is
+// actually written to the database. Instead, multer holds the file briefly
+// in memory, and the route/controller handling the upload streams it into
+// MongoDB GridFS directly via utils/gridfsUpload.js, using the app's own
+// existing Mongoose connection. This avoids a second, separately-configured
+// database connection entirely.
+//
+// Files are NOT written to local disk at any point - Render's free plan
+// wipes local disk on every restart/redeploy, which is exactly why GridFS
+// (inside the database itself) is used for persistence instead.
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
 
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max per image
   fileFilter: (req, file, cb) => {
     if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {

@@ -41,10 +41,7 @@ router.post(
       next();
     });
   },
-  (req, res) => {
-    if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
-    res.json({ fileId: req.file.id, url: `/media/${req.file.id}` });
-  }
+  adminController.postUploadArticleImage
 );
 
 router.get('/articles/:id/edit', adminController.getArticleForm);

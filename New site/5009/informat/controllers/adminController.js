@@ -9,6 +9,7 @@ const PageView = require('../models/PageView');
 const slugify = require('../utils/slugify');
 const estimateReadingTime = require('../utils/readingTime');
 const { renderMarkdownToSafeHtml, toPlainText } = require('../utils/markdown');
+const { uploadBufferToGridFS } = require('../utils/gridfsUpload');
 
 const ADMIN_LAYOUT = 'layouts/admin';
 
@@ -457,9 +458,29 @@ async function getMediaLibrary(req, res, next) {
   }
 }
 
-function postUploadMedia(req, res) {
-  // multer + GridFsStorage has already stored the file by the time we get here.
-  res.redirect('/admin/media');
+async function postUploadMedia(req, res, next) {
+  try {
+    if (!req.file) {
+      return res.redirect('/admin/media?error=' + encodeURIComponent('No file was uploaded.'));
+    }
+    await uploadBufferToGridFS(req.file.buffer, req.file.originalname, req.file.mimetype);
+    res.redirect('/admin/media');
+  } catch (err) {
+    next(err);
+  }
+}
+
+// Used by the article editor's inline "upload featured image" control.
+async function postUploadArticleImage(req, res, next) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded.' });
+    }
+    const fileId = await uploadBufferToGridFS(req.file.buffer, req.file.originalname, req.file.mimetype);
+    res.json({ fileId: fileId.toString(), url: `/media/${fileId.toString()}` });
+  } catch (err) {
+    next(err);
+  }
 }
 
 async function postDeleteMedia(req, res, next) {
@@ -597,130 +618,4 @@ async function getAnalytics(req, res, next) {
 
     res.render('admin/analytics', {
       title: 'Analytics',
-      layout: ADMIN_LAYOUT,
-      hasData: totalViews30d > 0,
-      totalViews30d,
-      uniqueVisitors30d: uniqueVisitors30d.length,
-      byDay,
-      byCountry: byCountryWithPercent,
-      byDevice,
-      byBrowser,
-      byOs,
-      byReferrer,
-      topArticles
-    });
-  } catch (err) {
-    next(err);
-  }
-}
-
-// ---------- SETTINGS ----------
-
-async function getSettings(req, res, next) {
-  try {
-    const settings = await Settings.getSingleton();
-    res.render('admin/settings', {
-      title: 'Settings',
-      layout: ADMIN_LAYOUT,
-      settings,
-      saved: false
-    });
-  } catch (err) {
-    next(err);
-  }
-}
-
-async function postUpdateSettings(req, res, next) {
-  try {
-    const settings = await Settings.getSingleton();
-    const fields = [
-      'siteName',
-      'tagline',
-      'googleSiteVerificationMeta',
-      'contactEmail',
-      'aboutContent',
-      'socialTwitter',
-      'socialFacebook',
-      'socialLinkedin'
-    ];
-    fields.forEach((field) => {
-      if (typeof req.body[field] === 'string') {
-        settings[field] = req.body[field].trim();
-      }
-    });
-    await settings.save();
-
-    res.render('admin/settings', {
-      title: 'Settings',
-      layout: ADMIN_LAYOUT,
-      settings,
-      saved: true
-    });
-  } catch (err) {
-    next(err);
-  }
-}
-
-// ---------- MESSAGES ----------
-
-async function getMessages(req, res, next) {
-  try {
-    const messages = await ContactMessage.find().sort({ createdAt: -1 }).lean();
-    res.render('admin/messages', {
-      title: 'Messages',
-      layout: ADMIN_LAYOUT,
-      messages
-    });
-  } catch (err) {
-    next(err);
-  }
-}
-
-async function postMarkMessageRead(req, res, next) {
-  try {
-    await ContactMessage.findByIdAndUpdate(req.params.id, { isRead: true });
-    res.redirect('/admin/messages');
-  } catch (err) {
-    next(err);
-  }
-}
-
-async function postDeleteMessage(req, res, next) {
-  try {
-    await ContactMessage.findByIdAndDelete(req.params.id);
-    res.redirect('/admin/messages');
-  } catch (err) {
-    next(err);
-  }
-}
-
-module.exports = {
-  generateUniqueSlug,
-  findOrCreateTags,
-  getDashboard,
-  getArticlesList,
-  getArticleForm,
-  postCreateArticle,
-  postUpdateArticle,
-  postDeleteArticle,
-  postToggleTrending,
-  postSetStatus,
-  getTrendingPage,
-  getCategories,
-  postCreateCategory,
-  postUpdateCategory,
-  postDeleteCategory,
-  getMediaLibrary,
-  postUploadMedia,
-  postDeleteMedia,
-  getAnnouncements,
-  postCreateAnnouncement,
-  postToggleAnnouncement,
-  postDeleteAnnouncement,
-  getAnalytics,
-  getSettings,
-  postUpdateSettings,
-  getMessages,
-  postMarkMessageRead,
-  postDeleteMessage
-};
+   

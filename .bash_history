@@ -21,3 +21,8 @@ cd "New site/5009/informat"
 git add package.json
 git commit -m "Fix Mongoose version for GridFS compatibility"
 git push origin main
+git add utils/seedDefaults.js controllers/publicController.js
+git add .
+git status
+git commit -m "Update seed defaults and public controller logic"
+git push origin main
