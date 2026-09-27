@@ -36,3 +36,7 @@ git add .
 git status
 git commit -m "New update"
 git push origin main
+git add .
+git status
+git commit -m "Article is running"
+git push origin main
