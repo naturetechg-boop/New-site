@@ -1,5 +1,29 @@
-alert('article-form.js is running');
 document.addEventListener('DOMContentLoaded', function () {
+  // ---------- TEMPORARY DIAGNOSTIC - safe to remove once editor issue is solved ----------
+  (function () {
+    function exists(id) { return !!document.getElementById(id); }
+    var checks = {
+      'content-editor (the writing box)': exists('content-editor'),
+      'contentMarkdown (hidden save field)': exists('contentMarkdown'),
+      'article-form (the whole form)': exists('article-form'),
+      'insert-image-btn (Image button)': exists('insert-image-btn'),
+      'editor-image-file (hidden file picker)': exists('editor-image-file'),
+      'editor-toolbar (button container)': exists('editor-toolbar')
+    };
+    var allGood = Object.keys(checks).every(function (k) { return checks[k]; });
+    var lines = Object.keys(checks).map(function (k) {
+      return (checks[k] ? '\u2705 ' : '\u274c ') + k;
+    });
+    var banner = document.createElement('div');
+    banner.style.cssText =
+      'position:fixed;top:0;left:0;right:0;z-index:999999;padding:12px;' +
+      'font-family:monospace;font-size:12px;line-height:1.6;color:#fff;' +
+      'background:' + (allGood ? '#2f6b4f' : '#a3372c') + ';white-space:pre-wrap;';
+    banner.textContent = 'DIAGNOSTIC (this script IS running):\n' + lines.join('\n');
+    document.body.insertBefore(banner, document.body.firstChild);
+  })();
+  // ---------- End diagnostic - normal code continues below ----------
+
   // ---------- Scheduled-date field toggle ----------
   var statusSelect = document.getElementById('status');
   var scheduledField = document.getElementById('scheduled-field');

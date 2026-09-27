@@ -40,3 +40,19 @@ git add .
 git status
 git commit -m "Article is running"
 git push origin main
+git add .
+git status
+pwd
+lspwd
+pwd
+lscd ..
+pwd
+cd ..
+pwd
+cd "/public/New site/5009/informat/"
+git status
+cat public/js/article-form.js
+head -5 public/js/article-form.js
+cat .gitignore
+git status public/js/article-form.js
+git log -1 -- public/js/article-form.js

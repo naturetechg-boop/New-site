@@ -88,7 +88,7 @@
       </div>
       <div id="content-editor" class="rich-editor" contenteditable="true"><%- (article && (article.contentHtml || article.contentMarkdown)) || '<p><br></p>' %></div>
       <input type="hidden" name="contentMarkdown" id="contentMarkdown">
-      <input type="file" id="editor-image-file" accept="image/*" style="display:none;">
+      <input type="file" id="editor-image-file" accept="image/*" style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0;">
       <div id="editor-image-status" class="hint"></div>
       <p class="hint">Tap where you want an image, then tap "Image" to insert it - you'll be asked for a caption, and you can also tap directly into the caption text afterwards to edit it.</p>
     </div>
@@ -147,29 +147,3 @@
 </form>
 
 <script src="/js/article-form.js" defer></script>
-
-<!-- TEMPORARY DIAGNOSTIC - safe to remove once the editor issue is solved -->
-<script nonce="<%= cspNonce %>">
-  (function () {
-    function exists(id) { return !!document.getElementById(id); }
-    var checks = {
-      'content-editor (the writing box)': exists('content-editor'),
-      'contentMarkdown (hidden save field)': exists('contentMarkdown'),
-      'article-form (the whole form)': exists('article-form'),
-      'insert-image-btn (Image button)': exists('insert-image-btn'),
-      'editor-image-file (hidden file picker)': exists('editor-image-file')
-    };
-    var allGood = Object.keys(checks).every(function (k) { return checks[k]; });
-    var lines = Object.keys(checks).map(function (k) {
-      return (checks[k] ? '✅ ' : '❌ ') + k;
-    });
-    var banner = document.createElement('div');
-    banner.style.cssText =
-      'position:fixed;top:0;left:0;right:0;z-index:999999;padding:12px;' +
-      'font-family:monospace;font-size:12px;line-height:1.6;color:#fff;' +
-      'background:' + (allGood ? '#2f6b4f' : '#a3372c') + ';white-space:pre-wrap;';
-    banner.textContent = 'DIAGNOSTIC:\n' + lines.join('\n') +
-      '\n\nscript file itself running: ✅ (you are seeing this)';
-    document.body.insertBefore(banner, document.body.firstChild);
-  })();
-</script>
