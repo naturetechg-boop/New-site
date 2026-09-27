@@ -222,6 +222,77 @@ input[type='datetime-local'], input[type='search'], textarea, select {
 
 textarea { font-family: 'IBM Plex Mono', monospace; font-size: 0.88rem; }
 
+/* ---------- Rich text (WYSIWYG) article editor ---------- */
+
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.6rem;
+  border: 1px solid var(--a-line);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  background: #f4f3ef;
+}
+
+.editor-toolbar button {
+  background: #fff;
+  border: 1px solid var(--a-line);
+  border-radius: 5px;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.85rem;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  color: var(--a-ink);
+}
+
+.editor-toolbar button:hover {
+  border-color: var(--a-accent);
+  color: var(--a-accent);
+}
+
+.rich-editor {
+  min-height: 320px;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--a-line);
+  border-radius: 0 0 6px 6px;
+  background: #fff;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--a-ink);
+}
+
+.rich-editor:focus {
+  outline: 2px solid var(--a-accent);
+  outline-offset: -2px;
+}
+
+.rich-editor p { margin: 0 0 0.9rem; }
+.rich-editor h2 { font-size: 1.35rem; margin: 1.2rem 0 0.6rem; }
+.rich-editor h3 { font-size: 1.15rem; margin: 1rem 0 0.5rem; }
+.rich-editor blockquote {
+  margin: 0.8rem 0;
+  padding-left: 1rem;
+  border-left: 3px solid var(--a-accent);
+  color: var(--a-muted);
+  font-style: italic;
+}
+.rich-editor ul, .rich-editor ol { padding-left: 1.4rem; margin: 0 0 0.9rem; }
+.rich-editor figure {
+  margin: 1rem 0;
+  padding: 0.6rem;
+  border: 1px dashed var(--a-line);
+  border-radius: 6px;
+}
+.rich-editor figure img { max-width: 100%; border-radius: 4px; display: block; }
+.rich-editor figcaption {
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--a-muted);
+  font-style: italic;
+}
+
 .checkbox-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.8rem; }
 .checkbox-row input { width: auto; }
 

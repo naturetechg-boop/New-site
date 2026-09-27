@@ -1,15 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-  var contentField = document.getElementById('contentMarkdown');
-  if (contentField && window.SimpleMDE) {
-    // eslint-disable-next-line no-unused-vars
-    var easyMDE = new SimpleMDE({
-      element: contentField,
-      spellChecker: false,
-      status: ['lines', 'words'],
-      placeholder: 'Write your article in Markdown…'
-    });
-  }
-
+  // ---------- Scheduled-date field toggle ----------
   var statusSelect = document.getElementById('status');
   var scheduledField = document.getElementById('scheduled-field');
   if (statusSelect && scheduledField) {
@@ -18,40 +8,151 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  var fileInput = document.getElementById('featuredImageFile');
-  var form = document.getElementById('article-form');
-  if (fileInput && form) {
-    fileInput.addEventListener('change', function (e) {
+  // ---------- Featured image: local preview only (no network call needed) ----------
+  var featuredFileInput = document.getElementById('featuredImageFile');
+  var featuredPreviewBox = document.getElementById('upload-preview');
+  if (featuredFileInput && featuredPreviewBox && window.FileReader) {
+    featuredFileInput.addEventListener('change', function (e) {
       var file = e.target.files[0];
       if (!file) return;
-
-      var statusEl = document.getElementById('upload-status');
-      statusEl.textContent = 'Uploading…';
-
-      var csrfToken = form.querySelector('input[name="_csrf"]').value;
-      var formData = new FormData();
-      formData.append('file', file);
-
-      fetch('/admin/articles/upload-image', {
-        method: 'POST',
-        headers: { 'X-CSRF-Token': csrfToken },
-        body: formData
-      })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-          if (data.error) {
-            statusEl.textContent = 'Error: ' + data.error;
-            return;
-          }
-          document.getElementById('featuredImageFileId').value = data.fileId;
-          document.getElementById('featuredImageUrl').value = '';
-          statusEl.textContent = 'Uploaded.';
-          document.getElementById('upload-preview').innerHTML =
-            '<img src="' + data.url + '" alt="" style="max-width:220px; border-radius:6px; border:1px solid var(--a-line);">';
-        })
-        .catch(function () {
-          statusEl.textContent = 'Upload failed. Please try again.';
-        });
+      var reader = new FileReader();
+      reader.onload = function (event) {
+        featuredPreviewBox.innerHTML =
+          '<img src="' + event.target.result + '" alt="" style="max-width:220px; border-radius:6px; border:1px solid var(--a-line);">';
+      };
+      reader.readAsDataURL(file);
     });
+  }
+
+  // ---------- Article content: WordPress-style rich text editor ----------
+  var editor = document.getElementById('content-editor');
+  var hiddenContentField = document.getElementById('contentMarkdown');
+  var form = document.getElementById('article-form');
+
+  if (editor && hiddenContentField && form) {
+    // Chrome defaults to wrapping each new line in a <div> rather than a
+    // <p> when you press Enter in a contenteditable area. Force <p> so the
+    // public article page's paragraph spacing/line-height styles apply
+    // consistently, since those are defined for <p>, not <div>.
+    try {
+      document.execCommand('defaultParagraphSeparator', false, 'p');
+    } catch (e) {
+      // Non-fatal if a browser doesn't support this - content still saves fine either way.
+    }
+
+    // Copy the editor's HTML into the real form field right before submitting,
+    // since a contenteditable <div> does not submit its content on its own.
+    form.addEventListener('submit', function () {
+      hiddenContentField.value = editor.innerHTML;
+    });
+
+    // ---- Toolbar formatting buttons (bold, italic, headings, lists, etc.) ----
+    var toolbarButtons = document.querySelectorAll('#editor-toolbar button[data-cmd]');
+    toolbarButtons.forEach(function (btn) {
+      // Use mousedown + preventDefault so clicking the button does not steal
+      // focus away from the editor, which would clear the text selection
+      // the formatting command needs to act on.
+      btn.addEventListener('mousedown', function (e) {
+        e.preventDefault();
+      });
+      btn.addEventListener('click', function () {
+        var cmd = btn.getAttribute('data-cmd');
+        var value = btn.getAttribute('data-value') || null;
+        editor.focus();
+        if (cmd === 'createLink') {
+          var url = window.prompt('Enter the link URL:', 'https://');
+          if (!url) return;
+          document.execCommand('createLink', false, url);
+          return;
+        }
+        document.execCommand(cmd, false, value);
+      });
+    });
+
+    // ---- Insert image with caption, at the current cursor position ----
+    var insertImageBtn = document.getElementById('insert-image-btn');
+    var editorImageFile = document.getElementById('editor-image-file');
+    var editorImageStatus = document.getElementById('editor-image-status');
+    var savedRange = null;
+
+    function saveCurrentSelection() {
+      var sel = window.getSelection();
+      if (sel && sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+        savedRange = sel.getRangeAt(0).cloneRange();
+      } else {
+        savedRange = null;
+      }
+    }
+
+    function restoreSelectionOrPlaceAtEnd() {
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      if (savedRange) {
+        sel.addRange(savedRange);
+        return;
+      }
+      editor.focus();
+      var range = document.createRange();
+      range.selectNodeContents(editor);
+      range.collapse(false);
+      sel.addRange(range);
+    }
+
+    if (insertImageBtn && editorImageFile) {
+      insertImageBtn.addEventListener('mousedown', function (e) {
+        e.preventDefault();
+      });
+      insertImageBtn.addEventListener('click', function () {
+        saveCurrentSelection();
+        editorImageFile.click();
+      });
+
+      editorImageFile.addEventListener('change', function (e) {
+        var file = e.target.files[0];
+        if (!file) return;
+
+        editorImageStatus.textContent = 'Uploading image…';
+
+        var csrfInput = form.querySelector('input[name="_csrf"]');
+        var csrfToken = csrfInput ? csrfInput.value : '';
+        var formData = new FormData();
+        formData.append('file', file);
+
+        fetch('/admin/articles/upload-image', {
+          method: 'POST',
+          headers: { 'X-CSRF-Token': csrfToken },
+          body: formData
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (data.error) {
+              editorImageStatus.textContent = 'Error: ' + data.error;
+              return;
+            }
+
+            restoreSelectionOrPlaceAtEnd();
+
+            var caption = window.prompt('Add a caption for this image (leave blank for none):', '') || '';
+            var escapedCaption = caption
+              .replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;');
+
+            var figureHtml =
+              '<figure><img src="' + data.url + '" alt="' + escapedCaption + '">' +
+              (caption ? '<figcaption>' + escapedCaption + '</figcaption>' : '') +
+              '</figure><p><br></p>';
+
+            document.execCommand('insertHTML', false, figureHtml);
+
+            editorImageStatus.textContent = 'Image inserted.';
+            editorImageFile.value = '';
+          })
+          .catch(function () {
+            editorImageStatus.textContent = 'Upload failed. Please try again.';
+          });
+      });
+    }
   }
 });

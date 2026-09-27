@@ -1,9 +1,10 @@
 const WORDS_PER_MINUTE = 220;
 
-function estimateReadingTime(markdownOrText) {
-  if (!markdownOrText) return 1;
-  const words = String(markdownOrText)
-    .replace(/[#*_`>[\]()!-]/g, ' ')
+function estimateReadingTime(htmlOrMarkdownOrText) {
+  if (!htmlOrMarkdownOrText) return 1;
+  const words = String(htmlOrMarkdownOrText)
+    .replace(/<[^>]+>/g, ' ') // strip HTML tags (rich-text editor content)
+    .replace(/[#*_`>[\]()!-]/g, ' ') // strip leftover Markdown-style symbols, if any
     .trim()
     .split(/\s+/)
     .filter(Boolean).length;

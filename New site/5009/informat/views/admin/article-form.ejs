@@ -9,7 +9,7 @@
   <div class="alert alert-error"><%= error %></div>
 <% } %>
 
-<form action="<%= article && article._id ? `/admin/articles/${article._id}` : '/admin/articles' %>" method="POST" id="article-form">
+<form action="<%= article && article._id ? `/admin/articles/${article._id}` : '/admin/articles' %>" method="POST" id="article-form" enctype="multipart/form-data">
   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
   <input type="hidden" name="featuredImageFileId" id="featuredImageFileId" value="<%= (article && article.featuredImage && article.featuredImage.fileId) || '' %>">
 
@@ -51,8 +51,8 @@
     </div>
     <div class="field">
       <label for="featuredImageFile">Upload featured image</label>
-      <input type="file" id="featuredImageFile" accept="image/*">
-      <div id="upload-status" class="hint"></div>
+      <input type="file" id="featuredImageFile" name="featuredImageFile" accept="image/*">
+      <p class="hint">Choosing a file here will replace any image URL above when you save this article.</p>
       <%
         let existingImgSrc = '';
         if (article && article.featuredImage) {
@@ -73,8 +73,24 @@
 
   <div class="panel">
     <div class="field">
-      <label for="contentMarkdown">Article content (Markdown)</label>
-      <textarea id="contentMarkdown" name="contentMarkdown" rows="18"><%= article ? article.contentMarkdown : '' %></textarea>
+      <label>Article content</label>
+      <div class="editor-toolbar" id="editor-toolbar">
+        <button type="button" data-cmd="bold" title="Bold"><b>B</b></button>
+        <button type="button" data-cmd="italic" title="Italic"><i>I</i></button>
+        <button type="button" data-cmd="formatBlock" data-value="H2" title="Heading">H2</button>
+        <button type="button" data-cmd="formatBlock" data-value="H3" title="Subheading">H3</button>
+        <button type="button" data-cmd="formatBlock" data-value="P" title="Paragraph">¶</button>
+        <button type="button" data-cmd="formatBlock" data-value="BLOCKQUOTE" title="Quote">" "</button>
+        <button type="button" data-cmd="insertUnorderedList" title="Bullet list">• List</button>
+        <button type="button" data-cmd="insertOrderedList" title="Numbered list">1. List</button>
+        <button type="button" data-cmd="createLink" title="Link">Link</button>
+        <button type="button" id="insert-image-btn" title="Insert image">🖼 Image</button>
+      </div>
+      <div id="content-editor" class="rich-editor" contenteditable="true"><%- (article && (article.contentHtml || article.contentMarkdown)) || '<p><br></p>' %></div>
+      <input type="hidden" name="contentMarkdown" id="contentMarkdown">
+      <input type="file" id="editor-image-file" accept="image/*" style="display:none;">
+      <div id="editor-image-status" class="hint"></div>
+      <p class="hint">Tap where you want an image, then tap "Image" to insert it - you'll be asked for a caption, and you can also tap directly into the caption text afterwards to edit it.</p>
     </div>
     <div class="field">
       <label for="excerpt">Excerpt (leave blank to auto-generate)</label>
@@ -130,6 +146,4 @@
   </div>
 </form>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
-<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
 <script src="/js/article-form.js" defer></script>

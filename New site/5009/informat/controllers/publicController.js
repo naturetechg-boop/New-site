@@ -1,7 +1,7 @@
 const Article = require('../models/Article');
 const Category = require('../models/Category');
 const ContactMessage = require('../models/ContactMessage');
-const { toPlainText } = require('../utils/markdown');
+const { toPlainTextFromHtml } = require('../utils/markdown');
 
 // IMPORTANT: this must be a function, not a plain object. A plain object
 // would call `new Date()` only once, when the server process starts, and
@@ -148,7 +148,7 @@ async function getArticleDetail(req, res, next) {
 
     res.render('public/article', {
       title: article.seoTitle || article.title,
-      metaDescription: article.seoDescription || article.excerpt || toPlainText(article.contentMarkdown),
+      metaDescription: article.seoDescription || article.excerpt || toPlainTextFromHtml(article.contentHtml),
       article,
       relatedArticles: related,
       canonicalPath: `/article/${article.slug}`,

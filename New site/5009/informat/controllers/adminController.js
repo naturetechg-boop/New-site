@@ -8,7 +8,7 @@ const Settings = require('../models/Settings');
 const PageView = require('../models/PageView');
 const slugify = require('../utils/slugify');
 const estimateReadingTime = require('../utils/readingTime');
-const { renderMarkdownToSafeHtml, toPlainText } = require('../utils/markdown');
+const { sanitizeRichTextHtml, toPlainTextFromHtml } = require('../utils/markdown');
 const { uploadBufferToGridFS } = require('../utils/gridfsUpload');
 
 const ADMIN_LAYOUT = 'layouts/admin';
@@ -199,20 +199,24 @@ async function postCreateArticle(req, res, next) {
 
     const slug = await generateUniqueSlug(Article, data.customSlug || data.title);
     const tagIds = await findOrCreateTags(req.body.tags);
-    const contentHtml = renderMarkdownToSafeHtml(data.contentMarkdown);
+    // NOTE: despite the field name "contentMarkdown" (kept as-is to avoid a
+    // database migration), this now holds HTML straight from the WYSIWYG
+    // editor, not Markdown source - sanitizeRichTextHtml cleans it directly
+    // rather than parsing it as Markdown first.
+    const contentHtml = sanitizeRichTextHtml(data.contentMarkdown);
 
     const now = new Date();
     const article = new Article({
       title: data.title,
       subtitle: data.subtitle,
       slug,
-      contentMarkdown: data.contentMarkdown,
+      contentMarkdown: contentHtml,
       contentHtml,
-      excerpt: data.excerpt || toPlainText(data.contentMarkdown, 200),
+      excerpt: data.excerpt || toPlainTextFromHtml(contentHtml, 200),
       author: data.author,
       category: categoryDoc._id,
       tags: tagIds,
-      readingTimeMinutes: estimateReadingTime(data.contentMarkdown),
+      readingTimeMinutes: estimateReadingTime(contentHtml),
       seoTitle: data.seoTitle,
       seoDescription: data.seoDescription,
       isTrending: data.isTrending,
@@ -221,7 +225,10 @@ async function postCreateArticle(req, res, next) {
       featuredImage: { url: data.featuredImageUrl, altText: data.featuredImageAlt, fileId: null }
     });
 
-    if (req.body.featuredImageFileId) {
+    if (req.file) {
+      const fileId = await uploadBufferToGridFS(req.file.buffer, req.file.originalname, req.file.mimetype);
+      article.featuredImage.fileId = fileId;
+    } else if (req.body.featuredImageFileId) {
       article.featuredImage.fileId = req.body.featuredImageFileId;
     }
 
@@ -266,15 +273,21 @@ async function postUpdateArticle(req, res, next) {
 
     const wasPublished = article.status === 'published';
 
+    // NOTE: despite the field name "contentMarkdown" (kept as-is to avoid a
+    // database migration), this now holds HTML straight from the WYSIWYG
+    // editor, not Markdown source - sanitizeRichTextHtml cleans it directly
+    // rather than parsing it as Markdown first.
+    const contentHtml = sanitizeRichTextHtml(data.contentMarkdown);
+
     article.title = data.title;
     article.subtitle = data.subtitle;
-    article.contentMarkdown = data.contentMarkdown;
-    article.contentHtml = renderMarkdownToSafeHtml(data.contentMarkdown);
-    article.excerpt = data.excerpt || toPlainText(data.contentMarkdown, 200);
+    article.contentMarkdown = contentHtml;
+    article.contentHtml = contentHtml;
+    article.excerpt = data.excerpt || toPlainTextFromHtml(contentHtml, 200);
     article.author = data.author;
     article.category = data.category;
     article.tags = await findOrCreateTags(req.body.tags);
-    article.readingTimeMinutes = estimateReadingTime(data.contentMarkdown);
+    article.readingTimeMinutes = estimateReadingTime(contentHtml);
     article.seoTitle = data.seoTitle;
     article.seoDescription = data.seoDescription;
     article.isTrending = data.isTrending;
@@ -282,7 +295,10 @@ async function postUpdateArticle(req, res, next) {
     article.status = data.status;
     article.featuredImage.url = data.featuredImageUrl;
     article.featuredImage.altText = data.featuredImageAlt;
-    if (req.body.featuredImageFileId) {
+    if (req.file) {
+      const fileId = await uploadBufferToGridFS(req.file.buffer, req.file.originalname, req.file.mimetype);
+      article.featuredImage.fileId = fileId;
+    } else if (req.body.featuredImageFileId) {
       article.featuredImage.fileId = req.body.featuredImageFileId;
     }
 
@@ -470,7 +486,7 @@ async function postUploadMedia(req, res, next) {
   }
 }
 
-// Used by the article editor's inline "upload featured image" control.
+// Used by the article editor's inline "insert image" toolbar button.
 async function postUploadArticleImage(req, res, next) {
   try {
     if (!req.file) {
@@ -595,13 +611,6 @@ async function getAnalytics(req, res, next) {
         ]),
         PageView.aggregate([
           { $match: { createdAt: { $gte: since30 } } },
-          { $group: { _id: '$os', count: { $sum: 1 } } },
-          { $sort: { count: -1 } },
-          { $limit: 6 }
-        ]),
-        Article.find({ status: 'published' }).sort({ viewCount: -1 }).limit(8).select('title slug viewCount').lean(),
-        PageView.aggregate([
-          { $match: { createdAt: { $gte: since30 } } },
           { $group: { _id: '$referrerHost', count: { $sum: 1 } } },
           { $sort: { count: -1 } },
           { $limit: 8 }
@@ -618,7 +627,7 @@ async function getAnalytics(req, res, next) {
 
     res.render('admin/analytics', {
       title: 'Analytics',
-   layout: ADMIN_LAYOUT,
+      layout: ADMIN_LAYOUT,
       hasData: totalViews30d > 0,
       totalViews30d,
       uniqueVisitors30d: uniqueVisitors30d.length,
