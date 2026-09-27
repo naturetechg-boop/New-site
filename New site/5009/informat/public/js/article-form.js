@@ -1,3 +1,4 @@
+alert('article-form.js is running');
 document.addEventListener('DOMContentLoaded', function () {
   // ---------- Scheduled-date field toggle ----------
   var statusSelect = document.getElementById('status');
@@ -30,28 +31,18 @@ document.addEventListener('DOMContentLoaded', function () {
   var form = document.getElementById('article-form');
 
   if (editor && hiddenContentField && form) {
-    // Chrome defaults to wrapping each new line in a <div> rather than a
-    // <p> when you press Enter in a contenteditable area. Force <p> so the
-    // public article page's paragraph spacing/line-height styles apply
-    // consistently, since those are defined for <p>, not <div>.
     try {
       document.execCommand('defaultParagraphSeparator', false, 'p');
     } catch (e) {
       // Non-fatal if a browser doesn't support this - content still saves fine either way.
     }
 
-    // Copy the editor's HTML into the real form field right before submitting,
-    // since a contenteditable <div> does not submit its content on its own.
     form.addEventListener('submit', function () {
       hiddenContentField.value = editor.innerHTML;
     });
 
-    // ---- Toolbar formatting buttons (bold, italic, headings, lists, etc.) ----
     var toolbarButtons = document.querySelectorAll('#editor-toolbar button[data-cmd]');
     toolbarButtons.forEach(function (btn) {
-      // Use mousedown + preventDefault so clicking the button does not steal
-      // focus away from the editor, which would clear the text selection
-      // the formatting command needs to act on.
       btn.addEventListener('mousedown', function (e) {
         e.preventDefault();
       });
@@ -69,7 +60,6 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     });
 
-    // ---- Insert image with caption, at the current cursor position ----
     var insertImageBtn = document.getElementById('insert-image-btn');
     var editorImageFile = document.getElementById('editor-image-file');
     var editorImageStatus = document.getElementById('editor-image-status');
