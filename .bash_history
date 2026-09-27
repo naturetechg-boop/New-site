@@ -30,3 +30,5 @@ git add .
 git status
 git commit -m "Update seed defaults and public controller logic"
 git push origin main
+git add
+git add.

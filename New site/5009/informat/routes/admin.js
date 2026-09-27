@@ -6,6 +6,7 @@ const adminController = require('../controllers/adminController');
 const { requireAuth, redirectIfAuthenticated } = require('../middleware/auth');
 const { loginLimiter } = require('../middleware/security');
 const upload = require('../middleware/upload');
+const { verifyCsrfAfterUpload } = require('../middleware/csrf');
 
 // ---- Auth (public within /admin) ----
 router.get('/login', redirectIfAuthenticated, authController.getLogin);
@@ -28,7 +29,17 @@ router.post('/account/password', authController.postChangePassword);
 // Articles
 router.get('/articles', adminController.getArticlesList);
 router.get('/articles/new', adminController.getArticleForm);
-router.post('/articles', adminController.postCreateArticle);
+router.post(
+  '/articles',
+  (req, res, next) => {
+    upload.single('featuredImageFile')(req, res, (err) => {
+      if (err) return next(err);
+      next();
+    });
+  },
+  verifyCsrfAfterUpload,
+  adminController.postCreateArticle
+);
 
 // AJAX endpoint used by the article editor to upload a featured image inline.
 // IMPORTANT: this static route must be registered BEFORE the "/articles/:id"
@@ -41,11 +52,22 @@ router.post(
       next();
     });
   },
+  verifyCsrfAfterUpload,
   adminController.postUploadArticleImage
 );
 
 router.get('/articles/:id/edit', adminController.getArticleForm);
-router.post('/articles/:id', adminController.postUpdateArticle);
+router.post(
+  '/articles/:id',
+  (req, res, next) => {
+    upload.single('featuredImageFile')(req, res, (err) => {
+      if (err) return next(err);
+      next();
+    });
+  },
+  verifyCsrfAfterUpload,
+  adminController.postUpdateArticle
+);
 router.post('/articles/:id/delete', adminController.postDeleteArticle);
 router.post('/articles/:id/toggle-trending', adminController.postToggleTrending);
 router.post('/articles/:id/status', adminController.postSetStatus);
@@ -66,7 +88,7 @@ router.post('/media/upload', (req, res, next) => {
     if (err) return res.redirect(`/admin/media?error=${encodeURIComponent(err.message)}`);
     next();
   });
-}, adminController.postUploadMedia);
+}, verifyCsrfAfterUpload, adminController.postUploadMedia);
 router.post('/media/:id/delete', adminController.postDeleteMedia);
 
 // Announcements
